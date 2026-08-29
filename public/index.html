@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee</title>
+</head>
+<body>
+    <h2>Enter Employee Data</h2>
+    <form action="#" id="employeeForm">
+        <label for="name">Name</label> <input type="text" name="name" id="empName" required> <br>
+        <label for="email">Email</label><input type="text" name="email" id="empEmail" required><br>
+        <label for="position">Position</label><input type="text" name="position" id="empPosition" required><br>
+        <label for="salary">Salary</label><input type="number" name="salary" id="empSalary" required><br>
+        <label for="joiningDate">Joining Date</label> <input type="date" id="empJoiningDate" required><br>
+        <input type="button" value="Create Employee" id="createEmployee">
+    </form>
+
+    <p id="resultMsg"></p>
+
+    <script>
+        const empName = document.getElementById('empName')
+        const empEmail = document.getElementById('empEmail')
+        const empPosition = document.getElementById('empPosition')
+        const empSalary = document.getElementById('empSalary')
+        const empJoiningDate = document.getElementById('empJoiningDate')
+        const resultMsg = document.getElementById('resultMsg')
+
+        document.getElementById('createEmployee').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/employees', {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: empName.value,
+                        email: empEmail.value,
+                        position: empPosition.value,
+                        salary: Number(empSalary.value),
+                        joiningDate: empJoiningDate.value
+                    }),
+                });
+
+                const data = await response.json()
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Something went wrong')
+                }
+
+                resultMsg.textContent = `Employee "${data.name}" created successfully!`
+                resultMsg.style.color = 'green'
+
+                // clear the form after success
+                document.getElementById('employeeForm').reset()
+
+            } catch (err) {
+                console.error(err)
+                resultMsg.textContent = `Error: ${err.message}`
+                resultMsg.style.color = 'red'
+            }
+        })
+    </script>
+</body>
+</html>
