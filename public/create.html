@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Employee</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+            color: #2c3e50;
+        }
+        #navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #navbar h2 { margin: 0; }
+        #navbar a.back-btn {
+            background: #7f8c8d;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            text-decoration: none;
+        }
+        #navbar a.back-btn:hover { background: #6c7a7a; }
+
+        #formWrapper {
+            max-width: 480px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        #formWrapper h2 { margin-top: 0; }
+
+        .field { margin-bottom: 16px; }
+        .field label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .field input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .field input:focus {
+            outline: none;
+            border-color: #2980b9;
+        }
+        .field-error {
+            color: #c0392b;
+            font-size: 0.85em;
+            margin-top: 4px;
+            min-height: 1em;
+        }
+
+        #createEmployee {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        #createEmployee:hover { background: #219150; }
+        #createEmployee:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        #resultMsg {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav id="navbar">
+        <h2>Create Employee</h2>
+        <a class="back-btn" href="index.html">&larr; Back to list</a>
+    </nav>
+
+    <div id="formWrapper">
+        <h2>Enter Employee Data</h2>
+        <form id="employeeForm" novalidate>
+            <div class="field">
+                <label for="empName">Name</label>
+                <input type="text" name="name" id="empName" required>
+                <div class="field-error" id="nameError"></div>
+            </div>
+            <div class="field">
+                <label for="empEmail">Email</label>
+                <input type="email" name="email" id="empEmail" required>
+                <div class="field-error" id="emailError"></div>
+            </div>
+            <div class="field">
+                <label for="empPosition">Position</label>
+                <input type="text" name="position" id="empPosition" required>
+                <div class="field-error" id="positionError"></div>
+            </div>
+            <div class="field">
+                <label for="empSalary">Salary</label>
+                <input type="number" name="salary" id="empSalary" min="0" step="0.01" required>
+                <div class="field-error" id="salaryError"></div>
+            </div>
+            <div class="field">
+                <label for="empJoiningDate">Joining Date</label>
+                <input type="date" name="joiningDate" id="empJoiningDate" required>
+                <div class="field-error" id="joiningDateError"></div>
+            </div>
+            <button type="submit" id="createEmployee">Create Employee</button>
+        </form>
+
+        <p id="resultMsg"></p>
+    </div>
+
+    <script>
+        const form = document.getElementById('employeeForm');
+        const empName = document.getElementById('empName');
+        const empEmail = document.getElementById('empEmail');
+        const empPosition = document.getElementById('empPosition');
+        const empSalary = document.getElementById('empSalary');
+        const empJoiningDate = document.getElementById('empJoiningDate');
+        const resultMsg = document.getElementById('resultMsg');
+        const submitBtn = document.getElementById('createEmployee');
+
+        // today's date, used to stop joining dates being set in the future
+        const todayStr = new Date().toISOString().slice(0, 10);
+        empJoiningDate.setAttribute('max', todayStr);
+
+        function setFieldError(id, message) {
+            document.getElementById(id).textContent = message || '';
+        }
+
+        function clearErrors() {
+            ['nameError', 'emailError', 'positionError', 'salaryError', 'joiningDateError']
+                .forEach(id => setFieldError(id, ''));
+        }
+
+        function validate() {
+            clearErrors();
+            let valid = true;
+
+            if (!empName.value.trim()) {
+                setFieldError('nameError', 'Name is required.');
+                valid = false;
+            }
+
+            const emailVal = empEmail.value.trim();
+            if (!emailVal) {
+                setFieldError('emailError', 'Email is required.');
+                valid = false;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+                setFieldError('emailError', 'Enter a valid email address.');
+                valid = false;
+            }
+
+            if (!empPosition.value.trim()) {
+                setFieldError('positionError', 'Position is required.');
+                valid = false;
+            }
+
+            const salaryVal = empSalary.value;
+            if (salaryVal === '') {
+                setFieldError('salaryError', 'Salary is required.');
+                valid = false;
+            } else if (isNaN(Number(salaryVal)) || Number(salaryVal) < 0) {
+                setFieldError('salaryError', 'Salary must be a positive number.');
+                valid = false;
+            }
+
+            if (!empJoiningDate.value) {
+                setFieldError('joiningDateError', 'Joining date is required.');
+                valid = false;
+            } else if (empJoiningDate.value > todayStr) {
+                setFieldError('joiningDateError', 'Joining date cannot be in the future.');
+                valid = false;
+            }
+
+            return valid;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            resultMsg.textContent = '';
+
+            if (!validate()) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
+            try {
+                const response = await fetch('/api/employees', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: empName.value.trim(),
+                        email: empEmail.value.trim(),
+                        position: empPosition.value.trim(),
+                        salary: Number(empSalary.value),
+                        joiningDate: empJoiningDate.value
+                    }),
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Something went wrong');
+                }
+
+                resultMsg.textContent = `Employee "${data.name || empName.value.trim()}" created successfully!`;
+                resultMsg.style.color = 'green';
+
+                form.reset();
+            } catch (err) {
+                console.error(err);
+                resultMsg.textContent = `Error: ${err.message}`;
+                resultMsg.style.color = 'red';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Employee';
+            }
+        });
+    </script>
+</body>
+</html>
